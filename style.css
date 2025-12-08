@@ -1,0 +1,136 @@
+/* ---------- Base ---------- */
+:root{
+  --accent1: #00d0ff;
+  --accent2: #6c74ff;
+  --card-1: #6ABED6;
+  --card-2: #5369C1;
+  --card-3: #614AA9;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:'Montserrat',sans-serif;color:#111}
+
+/* ---------- NAVBAR + HERO SAME BACKGROUND ---------- */
+/* Replace "your-image.jpg" with your uploaded image filename */
+.custom-nav,
+.hero-section {
+  background: url("back.jpg") center/cover no-repeat;
+  background-size: cover;
+}
+
+/* make toggler icon visible on top of image */
+.navbar-toggler { filter: invert(1) contrast(120%); }
+
+/* navbar */
+.custom-nav{
+  padding: 18px 0;
+  transition: backdrop-filter .25s ease, background-color .25s ease;
+  z-index: 60;
+}
+.custom-nav .navbar-brand { color: #e9f7ff; text-shadow: 0 6px 18px rgba(0,0,0,0.45); }
+.custom-nav .nav-link { color: rgba(230,240,255,0.85); }
+
+/* when user scrolls, blur and darken the nav for readability */
+.custom-nav.scrolled{
+  backdrop-filter: blur(8px);
+  background-color: rgba(0,0,0,0.38);
+}
+
+/* ---------- HERO ---------- */
+.hero-section{
+  position:relative;
+  height:100vh;              /* tall hero like your screenshot */
+  display:flex;
+  align-items:center;
+  color:white;
+  overflow:hidden;
+}
+
+/* optional overlay to darken+color grade */
+.hero-overlay{
+  position:absolute;
+  inset:0;
+  background: linear-gradient(180deg, rgba(6,17,28,0.25), rgba(10,10,30,0.55));
+  z-index:1;
+}
+
+/* particle canvas sits on top of background but under content */
+#particles{
+  position:absolute;
+  inset:0;
+  z-index:2;
+  pointer-events:none;
+}
+
+.hero-content{ position:relative; z-index:3; padding-top:20px; }
+
+/* big serif headline (stacked) */
+.hero-title{
+  font-family: 'Playfair Display', serif;
+  font-size:64px;
+  line-height:0.95;
+  margin:0;
+  letter-spacing:-1px;
+  text-shadow: 0 8px 28px rgba(0,0,0,0.65);
+}
+.hero-title span{ color: #d9f9ff; }
+
+/* thin gradient divider below hero */
+.divider{
+  height:6px;
+  width:100%;
+  max-width:1200px;
+  margin: -26px auto 28px;
+  background: linear-gradient(90deg,var(--accent1),var(--accent2));
+  border-radius:10px;
+}
+
+/* ---------- Features cards ---------- */
+.features{ background:#fff; }
+.feature-card{ color:#fff; font-size:15px; min-height:140px; display:flex; align-items:center; }
+.card-1{ background:var(--card-1); }
+.card-2{ background:var(--card-2); color:#111; }
+.card-3{ background:var(--card-3); }
+
+/* fade-up reveal for cards */
+.feature-card{ opacity:0; transform:translateY(40px); transition: all .65s cubic-bezier(.22,.9,.3,1); }
+.feature-card.show{ opacity:1; transform:translateY(0); }
+
+/* ---------- Footer ---------- */
+.footer{ background:#080b16; }
+
+/* Responsive tweaks */
+@media (max-width: 991px){
+  .hero-title{ font-size:44px; }
+  .custom-nav.scrolled{ background-color: rgba(0,0,0,0.45); }
+}
+
+.custom-nav {
+  background: transparent !important;
+}
+
+/* White navbar when scrolling */
+.custom-nav.light-nav {
+  background-color: white !important;
+  backdrop-filter: none !important;
+}
+
+/* Text becomes dark */
+.custom-nav.light-nav .nav-link,
+.custom-nav.light-nav .navbar-brand {
+  color: #000 !important;
+}
+
+/* Toggler icon turns dark */
+.custom-nav.light-nav .navbar-toggler {
+  filter: invert(0) !important;
+}
+
+.btn-gradiant {
+  background: linear-gradient(90deg, #2648B4, #3B1B93);
+  border: none;
+  color: white !important;
+}
+
+.btn-gradiant:hover {
+  filter: brightness(1.15);
+}
