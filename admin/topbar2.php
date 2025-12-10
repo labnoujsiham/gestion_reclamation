@@ -6,7 +6,7 @@
 
 <div class="topbar">
     <div class="topbar-left">
-        <h2 class="page-title-topbar"><?php echo isset($page_title) ? $page_title : 'Dashboard'; ?></h2>
+        
     </div>
     <div class="topbar-right">
         <div class="notification-icon">
