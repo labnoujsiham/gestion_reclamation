@@ -184,7 +184,7 @@ function formatDate($date) {
                 <div class="stat-number"><?php echo htmlspecialchars($totalReclamations); ?></div>
             </div>
 
-            <div class="stat-card ferme">
+            <div class="stat-card femme">
                 <div class="stat-header">
                     <span class="stat-label">Fermé</span>
                     <div class="stat-icon">
