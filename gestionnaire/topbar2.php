@@ -307,7 +307,7 @@
 
 <div class="topbar">
     <div class="topbar-left">
-        <h2><?php echo isset($page_title) ? $page_title : 'Dashboard'; ?></h2>
+        
     </div>
     <div class="topbar-right">
         <div class="notification-icon" id="notificationBell">
