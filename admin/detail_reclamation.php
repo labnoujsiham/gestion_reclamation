@@ -251,6 +251,7 @@ $canRequestInfo = in_array($reclamation['statut_cle'], ['en_attente', 'en_cours'
     <link rel="stylesheet" href="sidebar2.css">
     <link rel="stylesheet" href="topbar2.css">
     <link rel="stylesheet" href="detail_reclamation.css">
+    <link rel="stylesheet" href="../user/detail_reclamation.css">
 </head>
 <body>
 
@@ -276,14 +277,7 @@ $canRequestInfo = in_array($reclamation['statut_cle'], ['en_attente', 'en_cours'
                 <div class="reclamation-header">
                     <div class="header-top">
                         <h1 class="reclamation-title"><?php echo htmlspecialchars($reclamation['objet']); ?></h1>
-                        <?php if ($canRequestInfo): ?>
-                            <form method="POST" style="display: inline;">
-                                <input type="hidden" name="action" value="request_info">
-                                <button type="submit" class="btn-request-info">
-                                    demander plus d'informations
-                                </button>
-                            </form>
-                        <?php endif; ?>
+                        
                     </div>
                     <span class="status-badge <?php echo getStatusClass($reclamation['statut_cle']); ?>">
                         <?php echo htmlspecialchars($reclamation['statut_libelle']); ?>
@@ -340,54 +334,32 @@ $canRequestInfo = in_array($reclamation['statut_cle'], ['en_attente', 'en_cours'
                 </div>
 
                 <!-- Attachments -->
-                <?php if (!empty($pieces_jointes)): ?>
-                <div class="section">
-                    <h3 class="section-title-detail">pièces jointes</h3>
-                    <div class="attachments-list">
-                        <?php foreach ($pieces_jointes as $pj): ?>
-                            <div class="attachment-item">
-                                <?php 
-                                $isImage = in_array($pj['mime'], ['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
-                                if ($isImage): 
-                                ?>
-                                    <div class="attachment-preview">
-                                        <img src="<?php echo htmlspecialchars($pj['chemin_fichier']); ?>" 
-                                             alt="<?php echo htmlspecialchars($pj['nom_original']); ?>"
-                                             onclick="openImageModal(this.src)">
-                                    </div>
-                                <?php else: ?>
-                                    <div class="attachment-file">
-                                        <i class='bx bx-file'></i>
-                                        <a href="<?php echo htmlspecialchars($pj['chemin_fichier']); ?>" target="_blank">
-                                            <?php echo htmlspecialchars($pj['nom_original']); ?>
-                                        </a>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
+                <div class="detail-section">
+                <div class="detail-label">Pièces jointes (<?php echo count($pieces_jointes); ?>)</div>
+                <?php if (count($pieces_jointes) > 0): ?>
+                <ul class="attachments-list">
+                    <?php foreach ($pieces_jointes as $fichier): ?>
+                    <li class="attachment-item">
+                        <i class='bx bx-file'></i>
+                        <div class="attachment-info">
+                            <div class="attachment-name"><?php echo htmlspecialchars($fichier['nom_original']); ?></div>
+                            <div class="attachment-size"><?php echo round($fichier['taille'] / 1024, 2); ?> KB</div>
+                        </div>
+                        <a href="<?php echo htmlspecialchars($fichier['chemin_fichier']); ?>" download class="btn" style="background: #45AECC; color: white; padding: 8px 16px;">
+                            <i class='bx bx-download'></i>
+                        </a>
+                    </li>
+                    <?php endforeach; ?>
+                </ul>
+                <?php else: ?>
+                <div class="empty-attachments">
+                    <i class='bx bx-folder-open' style="font-size: 48px; color: #ddd;"></i>
+                    <p>Aucune pièce jointe</p>
                 </div>
                 <?php endif; ?>
+            </div>
 
-                <!-- Update Status -->
-                <div class="action-section">
-                    <h3 class="action-title">mettre à jour le status</h3>
-                    <p class="action-subtitle">changer le status de la réclamation</p>
-                    <form method="POST" class="action-form">
-                        <input type="hidden" name="action" value="update_status">
-                        <select name="statut_id" class="action-select">
-                            <?php foreach ($statuts as $statut): ?>
-                                <option 
-                                    value="<?php echo $statut['id']; ?>"
-                                    <?php echo ($reclamation['statut_cle'] === $statut['cle']) ? 'selected' : ''; ?>
-                                >
-                                    <?php echo htmlspecialchars($statut['libelle']); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                        <button type="submit" class="btn-action">changer statue</button>
-                    </form>
-                </div>
+                
 
                 <!-- Update Priority -->
                 <div class="action-section">
@@ -434,21 +406,7 @@ $canRequestInfo = in_array($reclamation['statut_cle'], ['en_attente', 'en_cours'
                     </div>
 
                     <!-- Add Comment Form -->
-                    <div class="add-comment">
-                        <h4>Ajouter un commentaire</h4>
-                        <form method="POST">
-                            <input type="hidden" name="action" value="add_comment">
-                            <textarea 
-                                name="message" 
-                                class="comment-textarea" 
-                                placeholder="entrer votre commentaire..."
-                                required
-                            ></textarea>
-                            <button type="submit" class="btn-add-comment">
-                                Ajouter un commentaire
-                            </button>
-                        </form>
-                    </div>
+                    
                 </div>
             </div>
 

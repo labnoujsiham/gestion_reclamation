@@ -464,20 +464,7 @@ $canRequestInfo = in_array($reclamation['statut_cle'], ['en_attente', 'en_cours'
                     </form>
                 </div>
 
-                <!-- Update Priority -->
-                <div class="action-section">
-                    <h3 class="action-title">mettre à jour la priorité</h3>
-                    <p class="action-subtitle">changer la priorité de la réclamation</p>
-                    <form method="POST" class="action-form">
-                        <input type="hidden" name="action" value="update_priority">
-                        <select name="priorite" class="action-select">
-                            <option value="basse" <?php echo ($reclamation['priorite'] === 'basse') ? 'selected' : ''; ?>>Basse</option>
-                            <option value="moyenne" <?php echo ($reclamation['priorite'] === 'moyenne') ? 'selected' : ''; ?>>Moyenne</option>
-                            <option value="haute" <?php echo ($reclamation['priorite'] === 'haute') ? 'selected' : ''; ?>>Haute</option>
-                        </select>
-                        <button type="submit" class="btn-action">changer priorité</button>
-                    </form>
-                </div>
+               
 
             </div>
 
