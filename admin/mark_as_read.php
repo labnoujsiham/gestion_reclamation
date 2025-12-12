@@ -1,6 +1,6 @@
 <?php
 /**
- * API - Marquer les notifications comme lues (USER)
+ * API - Marquer les notifications comme lues (ADMIN)
  * Connexion directe PDO
  */
 
@@ -29,7 +29,7 @@ try {
     ];
     $pdo = new PDO($dsn, 'root', '', $options);
 } catch (PDOException $e) {
-    error_log("Erreur connexion DB mark_as_read USER: " . $e->getMessage());
+    error_log("Erreur connexion DB mark_as_read ADMIN: " . $e->getMessage());
     echo json_encode([
         'success' => false, 
         'message' => 'Erreur de connexion à la base de données'
@@ -81,7 +81,7 @@ try {
     ]);
     
 } catch (PDOException $e) {
-    error_log("Erreur mark_as_read USER: " . $e->getMessage());
+    error_log("Erreur mark_as_read ADMIN: " . $e->getMessage());
     echo json_encode([
         'success' => false,
         'message' => 'Erreur serveur'

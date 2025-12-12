@@ -2,6 +2,7 @@
 /**
  * Backend pour ajouter une réclamation
  * ADAPTÉ pour le projet de ton ami
+ * AVEC NOTIFICATION GESTIONNAIRES + DEBUG ✅
  */
 
 // Démarrer la session
@@ -113,6 +114,75 @@ try {
     
     $reclamationId = $pdo->lastInsertId();
     
+    // ✅ NOTIFIER TOUS LES GESTIONNAIRES (VERSION DEBUG)
+    error_log("=== DÉBUT NOTIFICATION GESTIONNAIRES ===");
+    error_log("Réclamation ID: " . $reclamationId);
+    error_log("User ID: " . $userId);
+    
+    try {
+        // Récupérer tous les gestionnaires et administrateurs
+        $stmt = $pdo->prepare("
+            SELECT id, nom, role FROM users 
+            WHERE role IN ('gestionnaire', 'administrateur')
+        ");
+        $stmt->execute();
+        $gestionnaires = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        error_log("Nombre de gestionnaires trouvés: " . count($gestionnaires));
+        
+        if (count($gestionnaires) === 0) {
+            error_log("⚠️ ERREUR: Aucun gestionnaire trouvé dans la base !");
+        } else {
+            error_log("Liste des gestionnaires:");
+            foreach ($gestionnaires as $g) {
+                error_log("  - ID: " . $g['id'] . ", Nom: " . $g['nom'] . ", Role: " . $g['role']);
+            }
+        }
+        
+        // Récupérer le nom du user pour le message
+        $stmt = $pdo->prepare("SELECT nom FROM users WHERE id = ?");
+        $stmt->execute([$userId]);
+        $userInfo = $stmt->fetch(PDO::FETCH_ASSOC);
+        $userName = $userInfo['nom'] ?? 'Un utilisateur';
+        
+        error_log("Nom du user créateur: " . $userName);
+        
+        // Créer une notification pour chaque gestionnaire
+        $notifCount = 0;
+        foreach ($gestionnaires as $gest) {
+            error_log("Tentative création notification pour gestionnaire ID: " . $gest['id'] . " - " . $gest['nom']);
+            
+            $stmt = $pdo->prepare("
+                INSERT INTO notifications (user_id, type, reference_table, reference_id, contenu, lu, date_creation)
+                VALUES (?, 'nouvelle_reclamation', 'reclamations', ?, ?, 0, NOW())
+            ");
+            
+            $result = $stmt->execute([
+                $gest['id'],
+                $reclamationId,
+                'Nouvelle réclamation de ' . $userName
+            ]);
+            
+            if ($result) {
+                $notifCount++;
+                error_log("✅ Notification créée avec succès pour " . $gest['nom'] . " (ID: " . $gest['id'] . ")");
+            } else {
+                error_log("❌ ÉCHEC création notification pour " . $gest['nom']);
+                $errorInfo = $stmt->errorInfo();
+                error_log("Détails erreur SQL: " . json_encode($errorInfo));
+            }
+        }
+        
+        error_log("Total notifications créées: " . $notifCount . " / " . count($gestionnaires));
+        error_log("=== FIN NOTIFICATION GESTIONNAIRES ===");
+        
+    } catch (PDOException $e) {
+        error_log("❌ ERREUR PDO NOTIFICATION: " . $e->getMessage());
+        error_log("Code erreur: " . $e->getCode());
+        error_log("Stack trace: " . $e->getTraceAsString());
+        // On continue même si la notification échoue
+    }
+    
     // Gérer les pièces jointes si présentes
     $fichiers = [];
     if (isset($_FILES['pieces_jointes']) && !empty($_FILES['pieces_jointes']['name'][0])) {
@@ -178,7 +248,8 @@ try {
     ]);
     
 } catch (PDOException $e) {
-    error_log("Erreur add_reclamation: " . $e->getMessage());
+    error_log("❌ ERREUR GÉNÉRALE add_reclamation: " . $e->getMessage());
+    error_log("Code erreur: " . $e->getCode());
     echo json_encode([
         'success' => false,
         'message' => 'Erreur lors de la création de la réclamation'

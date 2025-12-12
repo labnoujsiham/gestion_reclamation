@@ -1,7 +1,7 @@
 <?php
 /**
- * API - Récupérer les notifications d'un GESTIONNAIRE
- * VERSION CONNEXION DIRECTE (sans getDBConnection)
+ * API - Récupérer les notifications d'un ADMIN
+ * Connexion directe PDO
  */
 
 // Démarrer la session
@@ -29,7 +29,7 @@ try {
     ];
     $pdo = new PDO($dsn, 'root', '', $options);
 } catch (PDOException $e) {
-    error_log("Erreur connexion DB get_notifications: " . $e->getMessage());
+    error_log("Erreur connexion DB get_notifications ADMIN: " . $e->getMessage());
     echo json_encode([
         'success' => false, 
         'message' => 'Erreur de connexion à la base de données'
@@ -47,7 +47,7 @@ try {
     $stmt->execute([$userId]);
     $count = $stmt->fetch()['count_non_lues'];
     
-    // Récupérer les notifications récentes (20 dernières)
+    // Récupérer les notifications récentes (30 dernières pour admin)
     $stmt = $pdo->prepare("
         SELECT 
             n.*,
@@ -58,7 +58,7 @@ try {
         LEFT JOIN users u ON r.user_id = u.id
         WHERE n.user_id = ?
         ORDER BY n.date_creation DESC
-        LIMIT 20
+        LIMIT 30
     ");
     $stmt->execute([$userId]);
     $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -70,7 +70,7 @@ try {
     ]);
     
 } catch (PDOException $e) {
-    error_log("Erreur get_notifications gestionnaire: " . $e->getMessage());
+    error_log("Erreur get_notifications ADMIN: " . $e->getMessage());
     echo json_encode([
         'success' => false,
         'message' => 'Erreur serveur'

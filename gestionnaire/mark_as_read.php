@@ -1,7 +1,7 @@
 <?php
 /**
  * API - Marquer les notifications comme lues (GESTIONNAIRE)
- * ADAPTÉ pour le projet de ton ami
+ * VERSION CONNEXION DIRECTE (sans getDBConnection)
  */
 
 // Démarrer la session
@@ -11,11 +11,6 @@ if (session_status() === PHP_SESSION_NONE) {
 
 header('Content-Type: application/json');
 
-// Connexion à la base de données
-require_once '../connexion/db_config.php';
-
-$pdo = getDBConnection();
-
 // Vérifier si l'utilisateur est connecté
 if (!isset($_SESSION['user_id'])) {
     echo json_encode(['success' => false, 'message' => 'Non authentifié']);
@@ -23,6 +18,24 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $userId = $_SESSION['user_id'];
+
+// ✅ CONNEXION DIRECTE PDO
+try {
+    $dsn = "mysql:host=localhost;dbname=gestion_reclamations;charset=utf8mb4";
+    $options = [
+        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_EMULATE_PREPARES   => false,
+    ];
+    $pdo = new PDO($dsn, 'root', '', $options);
+} catch (PDOException $e) {
+    error_log("Erreur connexion DB mark_as_read: " . $e->getMessage());
+    echo json_encode([
+        'success' => false, 
+        'message' => 'Erreur de connexion à la base de données'
+    ]);
+    exit;
+}
 
 // Récupérer les données JSON
 $input = json_decode(file_get_contents('php://input'), true);

@@ -1,4 +1,4 @@
-<!-- Topbar User avec Notifications -->
+<!-- Topbar USER avec Notifications -->
 <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 <link href="https://fonts.googleapis.com/css2?family=Afacad:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
@@ -133,7 +133,7 @@
 
 .notifications-header h3 {
     font-size: 18px;
-    color: #2c3e50;
+    color: #2d3748;
     margin: 0;
 }
 
@@ -160,6 +160,7 @@
     border-bottom: 1px solid #f5f5f5;
     cursor: pointer;
     transition: background 0.2s;
+    position: relative;
 }
 
 .notification-item:hover {
@@ -187,7 +188,7 @@
 .notification-title {
     font-size: 14px;
     font-weight: 600;
-    color: #2c3e50;
+    color: #2d3748;
     margin-bottom: 4px;
 }
 
@@ -267,7 +268,7 @@
 .toast-title {
     font-size: 15px;
     font-weight: 600;
-    color: #2c3e50;
+    color: #2d3748;
     margin-bottom: 4px;
 }
 
@@ -306,14 +307,14 @@
 
 <div class="topbar">
     <div class="topbar-left">
-        <h2><?php echo isset($page_title) ? $page_title : 'Dashboard'; ?></h2>
+        
     </div>
     <div class="topbar-right">
         <div class="notification-icon" id="notificationBell">
             <i class='bx bx-bell'></i>
             <span class="notification-badge" id="notificationBadge"></span>
         </div>
-        <div class="user-avatar" onclick="window.location.href='profil.php'" title="<?php echo htmlspecialchars($user['nom'] ?? 'Profil'); ?>">
+        <div class="user-avatar" onclick="window.location.href='profil.php'" title="<?php echo htmlspecialchars($user['nom'] ?? $_SESSION['user_name'] ?? 'Profil'); ?>">
             <i class='bx bx-user'></i>
         </div>
     </div>
@@ -333,11 +334,11 @@
 <!-- Toast Notification -->
 <div class="toast-notification" id="toastNotification">
     <div class="toast-icon">
-        <i class='bx bx-message-square-dots'></i>
+        <i class='bx bx-bell' id="toastIcon"></i>
     </div>
     <div class="toast-content">
-        <div class="toast-title" id="toastTitle">Nouveau commentaire !</div>
-        <div class="toast-message" id="toastMessage">Le gestionnaire a répondu à votre réclamation</div>
+        <div class="toast-title" id="toastTitle">Nouvelle notification</div>
+        <div class="toast-message" id="toastMessage">Vous avez une nouvelle notification</div>
         <div class="toast-action">
             <a href="#" id="toastLink">Voir la réclamation →</a>
         </div>
@@ -347,4 +348,4 @@
     </div>
 </div>
 
-<script src="notifications.js"></script>
+<script src="user_notifications.js"></script>

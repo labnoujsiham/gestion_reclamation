@@ -1,7 +1,7 @@
 <?php
 /**
- * API - Récupérer les notifications d'un utilisateur
- * ADAPTÉ pour le projet de ton ami
+ * API - Récupérer les notifications d'un USER
+ * Connexion directe PDO
  */
 
 // Démarrer la session
@@ -11,9 +11,6 @@ if (session_status() === PHP_SESSION_NONE) {
 
 header('Content-Type: application/json');
 
-// Connexion à la base de données
-require_once '../connexion/db_config.php';
-
 // Vérifier si l'utilisateur est connecté
 if (!isset($_SESSION['user_id'])) {
     echo json_encode(['success' => false, 'message' => 'Non authentifié']);
@@ -22,9 +19,25 @@ if (!isset($_SESSION['user_id'])) {
 
 $userId = $_SESSION['user_id'];
 
+// ✅ CONNEXION DIRECTE PDO
 try {
-    // Utiliser la variable globale $pdo
-    
+    $dsn = "mysql:host=localhost;dbname=gestion_reclamations;charset=utf8mb4";
+    $options = [
+        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_EMULATE_PREPARES   => false,
+    ];
+    $pdo = new PDO($dsn, 'root', '', $options);
+} catch (PDOException $e) {
+    error_log("Erreur connexion DB get_notifications USER: " . $e->getMessage());
+    echo json_encode([
+        'success' => false, 
+        'message' => 'Erreur de connexion à la base de données'
+    ]);
+    exit;
+}
+
+try {
     // Récupérer le nombre de notifications non lues
     $stmt = $pdo->prepare("
         SELECT COUNT(*) as count_non_lues 
@@ -35,29 +48,18 @@ try {
     $count = $stmt->fetch()['count_non_lues'];
     
     // Récupérer les notifications récentes (20 dernières)
-    // NOTE: La structure de la table notifications de ton ami est différente
-    // Il utilise: type, reference_table, reference_id, contenu
-    // Au lieu de: reclamation_id, gestionnaire_id, message
-    
     $stmt = $pdo->prepare("
         SELECT 
             n.*,
-            r.objet AS reclamation_objet,
-            u.nom AS gestionnaire_nom
+            r.objet AS reclamation_objet
         FROM notifications n
         LEFT JOIN reclamations r ON (n.reference_table = 'reclamations' AND n.reference_id = r.id)
-        LEFT JOIN users u ON u.id = (
-            SELECT auteur_id FROM commentaires 
-            WHERE reclamation_id = n.reference_id 
-            ORDER BY date_commentaire DESC 
-            LIMIT 1
-        )
         WHERE n.user_id = ?
         ORDER BY n.date_creation DESC
         LIMIT 20
     ");
     $stmt->execute([$userId]);
-    $notifications = $stmt->fetchAll();
+    $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     echo json_encode([
         'success' => true,
@@ -66,7 +68,7 @@ try {
     ]);
     
 } catch (PDOException $e) {
-    error_log("Erreur get_notifications: " . $e->getMessage());
+    error_log("Erreur get_notifications USER: " . $e->getMessage());
     echo json_encode([
         'success' => false,
         'message' => 'Erreur serveur'

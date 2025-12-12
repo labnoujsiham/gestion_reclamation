@@ -1,7 +1,6 @@
 /**
- * Système de Notifications - JavaScript GESTIONNAIRE
+ * Système de Notifications USER - JavaScript
  * Gère le badge, modal, toast et polling
- * ADAPTÉ pour le projet de ton ami
  */
 
 let notificationsData = [];
@@ -62,17 +61,22 @@ function renderNotifications(notifications) {
     }
     
     list.innerHTML = notifications.map(notif => {
-        // ADAPTÉ : La table de ton ami utilise reference_id au lieu de reclamation_id
         const reclamationId = notif.reference_id || 0;
-        // ADAPTÉ : La table de ton ami utilise contenu au lieu de message
-        const message = notif.contenu || notif.message || 'Nouvelle notification';
+        const message = notif.contenu || 'Nouvelle notification';
         const titre = notif.reclamation_objet || 'Réclamation';
+        
+        // Icône selon le type
+        let icon = 'bx-bell';
+        if (notif.type === 'demande_info') icon = 'bx-info-circle';
+        if (notif.type === 'statut_ferme') icon = 'bx-check-circle';
+        if (notif.type === 'nouveau_commentaire') icon = 'bx-message-square-dots';
         
         return `
             <div class="notification-item ${notif.lu == 0 ? 'unread' : ''}" 
                  onclick="handleNotificationClick(${notif.id}, ${reclamationId})">
                 <div class="notification-content">
                     <div class="notification-title">
+                        <i class='bx ${icon}' style="margin-right: 5px;"></i>
                         ${escapeHtml(titre)}
                     </div>
                     <div class="notification-message">
@@ -102,14 +106,16 @@ async function handleNotificationClick(notifId, reclamationId) {
 // Marquer comme lue
 async function markAsRead(notifId) {
     try {
-        await fetch('mark_as_read.php', {
+        const response = await fetch('mark_as_read.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ notification_id: notifId })
         });
         
-        // Recharger les notifications
-        loadNotifications();
+        if (response.ok) {
+            // Recharger les notifications immédiatement
+            await loadNotifications();
+        }
     } catch (error) {
         console.error('Erreur marquage comme lu:', error);
     }
@@ -118,14 +124,16 @@ async function markAsRead(notifId) {
 // Marquer toutes comme lues
 async function markAllAsRead() {
     try {
-        await fetch('mark_as_read.php', {
+        const response = await fetch('mark_as_read.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ mark_all: true })
         });
         
-        // Recharger les notifications
-        loadNotifications();
+        if (response.ok) {
+            // Recharger les notifications immédiatement
+            await loadNotifications();
+        }
     } catch (error) {
         console.error('Erreur marquage toutes comme lues:', error);
     }
@@ -155,14 +163,21 @@ function showToast(notif) {
     const title = document.getElementById('toastTitle');
     const message = document.getElementById('toastMessage');
     const link = document.getElementById('toastLink');
+    const icon = document.getElementById('toastIcon');
     
-    if (!toast || !title || !message || !link) return;
+    if (!toast || !title || !message || !link || !icon) return;
     
-    // ADAPTÉ : Utiliser reference_id et contenu
     const reclamationId = notif.reference_id || 0;
-    const messageText = notif.contenu || notif.message || 'Nouvelle notification';
+    const messageText = notif.contenu || 'Nouvelle notification';
     const titre = notif.reclamation_objet || 'Réclamation';
     
+    // Icône selon le type
+    let iconClass = 'bx-bell';
+    if (notif.type === 'demande_info') iconClass = 'bx-info-circle';
+    if (notif.type === 'statut_ferme') iconClass = 'bx-check-circle';
+    if (notif.type === 'nouveau_commentaire') iconClass = 'bx-message-square-dots';
+    
+    icon.className = 'bx ' + iconClass;
     title.textContent = titre;
     message.textContent = messageText;
     link.href = `detail_reclamation.php?id=${reclamationId}#commentaires`;

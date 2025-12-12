@@ -1,4 +1,4 @@
-<!-- Topbar Gestionnaire avec Notifications -->
+<!-- Topbar GESTIONNAIRE avec Notifications + Popup Urgente -->
 <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 <link href="https://fonts.googleapis.com/css2?family=Afacad:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
@@ -17,12 +17,6 @@
     padding: 0 40px;
     z-index: 1000;
     box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-}
-
-.topbar-left h2 {
-    font-size: 26px;
-    font-weight: 600;
-    color: #2c3e50;
 }
 
 .topbar-right {
@@ -88,10 +82,6 @@
     transition: 0.3s;
 }
 
-.user-avatar:hover {
-    transform: scale(1.05);
-}
-
 /* Modal Notifications */
 .notifications-modal {
     position: fixed;
@@ -105,18 +95,6 @@
     display: none;
     flex-direction: column;
     z-index: 2000;
-    animation: slideDown 0.3s ease;
-}
-
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 
 .notifications-modal.show {
@@ -142,11 +120,6 @@
     font-size: 13px;
     cursor: pointer;
     font-weight: 600;
-    transition: 0.3s;
-}
-
-.mark-all-read:hover {
-    color: #3a9bb5;
 }
 
 .notifications-list {
@@ -159,26 +132,16 @@
     padding: 15px 20px;
     border-bottom: 1px solid #f5f5f5;
     cursor: pointer;
-    transition: background 0.2s;
     position: relative;
-}
-
-.notification-item:hover {
-    background: #f8f9fa;
 }
 
 .notification-item.unread {
     background: #e8f6ff;
 }
 
-.notification-item.unread::before {
-    content: '';
-    position: absolute;
-    left: 20px;
-    width: 8px;
-    height: 8px;
-    background: #45AECC;
-    border-radius: 50%;
+.notification-item.urgent {
+    background: #ffebee !important;
+    border-left: 4px solid #e74c3c;
 }
 
 .notification-content {
@@ -189,13 +152,11 @@
     font-size: 14px;
     font-weight: 600;
     color: #2d3748;
-    margin-bottom: 4px;
 }
 
 .notification-message {
     font-size: 13px;
     color: #666;
-    margin-bottom: 6px;
 }
 
 .notification-time {
@@ -203,149 +164,153 @@
     color: #999;
 }
 
-.empty-notifications {
-    text-align: center;
-    padding: 60px 20px;
-    color: #999;
-}
-
-.empty-notifications i {
-    font-size: 64px;
-    color: #ddd;
-    margin-bottom: 15px;
-    display: block;
-}
-
-/* Toast Notification */
-.toast-notification {
-    position: fixed;
-    top: 100px;
-    right: 40px;
-    background: white;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+/* POPUP URGENTE */
+.urgent-popup-overlay {
     display: none;
-    align-items: center;
-    gap: 15px;
-    min-width: 350px;
-    z-index: 3000;
-    animation: slideIn 0.3s ease;
-    border-left: 4px solid #45AECC;
-}
-
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateX(400px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-.toast-notification.show {
-    display: flex;
-}
-
-.toast-icon {
-    width: 48px;
-    height: 48px;
-    background: #e8f6ff;
-    border-radius: 50%;
-    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 10000;
     align-items: center;
     justify-content: center;
-    color: #45AECC;
-    font-size: 24px;
 }
 
-.toast-content {
-    flex: 1;
+.urgent-popup-overlay.show {
+    display: flex;
 }
 
-.toast-title {
+.urgent-popup {
+    background: white;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+}
+
+.urgent-popup-header {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+    padding: 30px;
+    text-align: center;
+}
+
+.urgent-popup-header i {
+    font-size: 64px;
+    margin-bottom: 15px;
+}
+
+.urgent-popup-header h2 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.urgent-popup-body {
+    padding: 30px;
+}
+
+.urgent-info-box {
+    background: #fff3cd;
+    border-left: 4px solid #f39c12;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.urgent-info-box p {
+    margin: 8px 0;
+    color: #856404;
     font-size: 15px;
-    font-weight: 600;
-    color: #2d3748;
-    margin-bottom: 4px;
 }
 
-.toast-message {
-    font-size: 13px;
-    color: #666;
+.urgent-info-box strong {
+    color: #2c3e50;
+    font-weight: 700;
 }
 
-.toast-close {
+.priority-badge {
+    display: inline-block;
+    background: #e74c3c;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-left: 10px;
+}
+
+.urgent-popup-footer {
+    padding: 0 30px 30px 30px;
+    text-align: center;
+}
+
+.btn-urgent-ok {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: 700;
     cursor: pointer;
-    color: #999;
-    font-size: 20px;
-    transition: 0.3s;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+    font-family: 'Afacad', sans-serif;
 }
 
-.toast-close:hover {
-    color: #45AECC;
-}
-
-.toast-action {
-    margin-top: 10px;
-}
-
-.toast-action a {
-    color: #45AECC;
-    font-size: 13px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: 0.3s;
-}
-
-.toast-action a:hover {
-    color: #3a9bb5;
+.btn-urgent-ok:hover {
+    transform: translateY(-2px);
 }
 </style>
 
 <div class="topbar">
-    <div class="topbar-left">
-        
-    </div>
+    <div class="topbar-left"></div>
     <div class="topbar-right">
         <div class="notification-icon" id="notificationBell">
             <i class='bx bx-bell'></i>
             <span class="notification-badge" id="notificationBadge"></span>
         </div>
-        <div class="user-avatar" onclick="window.location.href='profil.php'" title="<?php echo htmlspecialchars($_SESSION['user_name'] ?? 'Profil'); ?>">
+        <div class="user-avatar" onclick="window.location.href='profil.php'">
             <i class='bx bx-user'></i>
         </div>
     </div>
 </div>
 
-<!-- Modal Notifications -->
 <div class="notifications-modal" id="notificationsModal">
     <div class="notifications-header">
         <h3>Notifications</h3>
         <span class="mark-all-read" id="markAllRead">Tout marquer comme lu</span>
     </div>
-    <div class="notifications-list" id="notificationsList">
-        <!-- Les notifications seront chargées ici par JavaScript -->
-    </div>
+    <div class="notifications-list" id="notificationsList"></div>
 </div>
 
-<!-- Toast Notification -->
-<div class="toast-notification" id="toastNotification">
-    <div class="toast-icon">
-        <i class='bx bx-message-square-dots'></i>
-    </div>
-    <div class="toast-content">
-        <div class="toast-title" id="toastTitle">Nouveau commentaire !</div>
-        <div class="toast-message" id="toastMessage">Le réclamant a répondu à votre commentaire</div>
-        <div class="toast-action">
-            <a href="#" id="toastLink">Voir la réclamation →</a>
+<div class="urgent-popup-overlay" id="urgentPopup">
+    <div class="urgent-popup">
+        <div class="urgent-popup-header">
+            <i class='bx bx-error-alt'></i>
+            <h2>RÉCLAMATION URGENTE !</h2>
+        </div>
+        <div class="urgent-popup-body">
+            <div class="urgent-info-box">
+                <p><strong>Vous avez été assigné à :</strong></p>
+                <p id="urgentTitle" style="font-size: 16px; font-weight: 600;">Chargement...</p>
+                <p style="margin-top: 15px;">
+                    <strong>Priorité :</strong>
+                    <span class="priority-badge">⚠️ HAUTE</span>
+                </p>
+                <p><strong>Délai :</strong> Traiter immédiatement</p>
+            </div>
+        </div>
+        <div class="urgent-popup-footer">
+            <button class="btn-urgent-ok" onclick="handleUrgentOk()">
+                <i class='bx bx-check-circle'></i> OK, je m'en occupe maintenant
+            </button>
         </div>
     </div>
-    <div class="toast-close" onclick="closeToast()">
-        <i class='bx bx-x'></i>
-    </div>
 </div>
 
-<script src="notifications.js"></script>
+<script src="gestionnaire_notifications.js"></script>

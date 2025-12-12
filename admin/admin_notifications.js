@@ -1,11 +1,11 @@
 /**
- * Système de Notifications - JavaScript
- * Gère le badge, modal, toast et polling
- * ADAPTÉ pour le projet de ton ami
+ * Système de Notifications ADMIN - JavaScript avec Filtres
+ * Gère le badge, modal, filtres, toast et polling
  */
 
 let notificationsData = [];
 let pollInterval = null;
+let currentFilter = 'all'; // Filtre actif
 
 // Initialisation au chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
@@ -23,7 +23,8 @@ async function loadNotifications() {
         if (data.success) {
             notificationsData = data.notifications;
             updateBadge(data.count_non_lues);
-            renderNotifications(data.notifications);
+            updateFilterCounts(data.notifications);
+            renderNotifications(data.notifications, currentFilter);
             
             // Afficher un toast pour les nouvelles notifications
             checkForNewNotifications(data.notifications);
@@ -46,12 +47,41 @@ function updateBadge(count) {
     }
 }
 
-// Rendre les notifications dans la modal
-function renderNotifications(notifications) {
+// Mettre à jour les compteurs des filtres
+function updateFilterCounts(notifications) {
+    const counts = {
+        all: notifications.length,
+        nouvelle_reclamation: 0,
+        nouveau_commentaire: 0,
+        demande_info: 0,
+        info_fournie: 0
+    };
+    
+    notifications.forEach(notif => {
+        if (counts.hasOwnProperty(notif.type)) {
+            counts[notif.type]++;
+        }
+    });
+    
+    document.getElementById('countAll').textContent = counts.all;
+    document.getElementById('countNew').textContent = counts.nouvelle_reclamation;
+    document.getElementById('countComment').textContent = counts.nouveau_commentaire;
+    document.getElementById('countInfo').textContent = counts.demande_info;
+    document.getElementById('countProvided').textContent = counts.info_fournie;
+}
+
+// Rendre les notifications dans la modal (avec filtre)
+function renderNotifications(notifications, filter = 'all') {
     const list = document.getElementById('notificationsList');
     if (!list) return;
     
-    if (notifications.length === 0) {
+    // Filtrer les notifications
+    let filteredNotifications = notifications;
+    if (filter !== 'all') {
+        filteredNotifications = notifications.filter(notif => notif.type === filter);
+    }
+    
+    if (filteredNotifications.length === 0) {
         list.innerHTML = `
             <div class="empty-notifications">
                 <i class='bx bx-bell-off'></i>
@@ -61,18 +91,35 @@ function renderNotifications(notifications) {
         return;
     }
     
-    list.innerHTML = notifications.map(notif => {
-        // ADAPTÉ : La table de ton ami utilise reference_id au lieu de reclamation_id
+    list.innerHTML = filteredNotifications.map(notif => {
         const reclamationId = notif.reference_id || 0;
-        // ADAPTÉ : La table de ton ami utilise contenu au lieu de message
-        const message = notif.contenu || notif.message || 'Nouvelle notification';
+        const message = notif.contenu || 'Nouvelle notification';
         const titre = notif.reclamation_objet || 'Réclamation';
+        
+        // Icône selon le type
+        let icon = 'bx-bell';
+        let iconColor = '#45AECC';
+        
+        if (notif.type === 'nouvelle_reclamation') {
+            icon = 'bx-file-plus';
+            iconColor = '#27ae60';
+        } else if (notif.type === 'nouveau_commentaire') {
+            icon = 'bx-message-square-dots';
+            iconColor = '#3498db';
+        } else if (notif.type === 'demande_info') {
+            icon = 'bx-info-circle';
+            iconColor = '#f39c12';
+        } else if (notif.type === 'info_fournie') {
+            icon = 'bx-check-circle';
+            iconColor = '#9b59b6';
+        }
         
         return `
             <div class="notification-item ${notif.lu == 0 ? 'unread' : ''}" 
                  onclick="handleNotificationClick(${notif.id}, ${reclamationId})">
                 <div class="notification-content">
                     <div class="notification-title">
+                        <i class='bx ${icon}' style="color: ${iconColor};"></i>
                         ${escapeHtml(titre)}
                     </div>
                     <div class="notification-message">
@@ -102,14 +149,15 @@ async function handleNotificationClick(notifId, reclamationId) {
 // Marquer comme lue
 async function markAsRead(notifId) {
     try {
-        await fetch('mark_as_read.php', {
+        const response = await fetch('mark_as_read.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ notification_id: notifId })
         });
         
-        // Recharger les notifications
-        loadNotifications();
+        if (response.ok) {
+            await loadNotifications();
+        }
     } catch (error) {
         console.error('Erreur marquage comme lu:', error);
     }
@@ -118,14 +166,15 @@ async function markAsRead(notifId) {
 // Marquer toutes comme lues
 async function markAllAsRead() {
     try {
-        await fetch('mark_as_read.php', {
+        const response = await fetch('mark_as_read.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ mark_all: true })
         });
         
-        // Recharger les notifications
-        loadNotifications();
+        if (response.ok) {
+            await loadNotifications();
+        }
     } catch (error) {
         console.error('Erreur marquage toutes comme lues:', error);
     }
@@ -139,12 +188,10 @@ function checkForNewNotifications(notifications) {
     
     const latestNotif = notifications[0];
     
-    // Si c'est une nouvelle notification non lue
     if (latestNotif.id > lastNotificationId && latestNotif.lu == 0) {
         showToast(latestNotif);
         lastNotificationId = latestNotif.id;
     } else if (lastNotificationId === 0 && notifications.length > 0) {
-        // Initialiser avec la dernière notification
         lastNotificationId = latestNotif.id;
     }
 }
@@ -155,21 +202,28 @@ function showToast(notif) {
     const title = document.getElementById('toastTitle');
     const message = document.getElementById('toastMessage');
     const link = document.getElementById('toastLink');
+    const icon = document.getElementById('toastIcon');
     
-    if (!toast || !title || !message || !link) return;
+    if (!toast || !title || !message || !link || !icon) return;
     
-    // ADAPTÉ : Utiliser reference_id et contenu
     const reclamationId = notif.reference_id || 0;
-    const messageText = notif.contenu || notif.message || 'Nouvelle notification';
+    const messageText = notif.contenu || 'Nouvelle notification';
     const titre = notif.reclamation_objet || 'Réclamation';
     
+    // Icône selon le type
+    let iconClass = 'bx-bell';
+    if (notif.type === 'nouvelle_reclamation') iconClass = 'bx-file-plus';
+    if (notif.type === 'nouveau_commentaire') iconClass = 'bx-message-square-dots';
+    if (notif.type === 'demande_info') iconClass = 'bx-info-circle';
+    if (notif.type === 'info_fournie') iconClass = 'bx-check-circle';
+    
+    icon.className = 'bx ' + iconClass;
     title.textContent = titre;
     message.textContent = messageText;
     link.href = `detail_reclamation.php?id=${reclamationId}#commentaires`;
     
     toast.classList.add('show');
     
-    // Auto-fermer après 7 secondes
     setTimeout(() => {
         closeToast();
     }, 7000);
@@ -202,7 +256,7 @@ function closeModal() {
 function startPolling() {
     pollInterval = setInterval(() => {
         loadNotifications();
-    }, 30000); // 30 secondes
+    }, 30000);
 }
 
 // Event listeners
@@ -220,6 +274,24 @@ function setupEventListeners() {
             markAllAsRead();
         });
     }
+    
+    // Filtres
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    filterButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Retirer classe active de tous les boutons
+            filterButtons.forEach(b => b.classList.remove('active'));
+            
+            // Ajouter classe active au bouton cliqué
+            btn.classList.add('active');
+            
+            // Mettre à jour le filtre actif
+            currentFilter = btn.getAttribute('data-filter');
+            
+            // Re-rendre les notifications avec le nouveau filtre
+            renderNotifications(notificationsData, currentFilter);
+        });
+    });
     
     // Fermer la modal si clic en dehors
     document.addEventListener('click', (e) => {
@@ -244,7 +316,7 @@ function escapeHtml(text) {
 function formatDate(dateString) {
     const date = new Date(dateString);
     const now = new Date();
-    const diff = Math.floor((now - date) / 1000); // en secondes
+    const diff = Math.floor((now - date) / 1000);
     
     if (diff < 60) return 'À l\'instant';
     if (diff < 3600) return `Il y a ${Math.floor(diff / 60)} min`;
