@@ -218,3 +218,43 @@ ADD COLUMN date_lu DATETIME NULL;
 -- Index for better performance
 CREATE INDEX idx_notifications_user_lu ON notifications(user_id, lu);
 CREATE INDEX idx_commentaires_reclamation ON commentaires(reclamation_id, date_commentaire);
+
+-- ========================================
+-- AJOUTS MANQUANTS - ReclaNova
+-- ========================================
+
+-- 1. Ajouter type_commentaire (si pas déjà fait)
+ALTER TABLE `commentaires` 
+ADD COLUMN `type_commentaire` ENUM('commentaire', 'demande_info', 'reponse_info') DEFAULT 'commentaire' 
+AFTER `message`;
+
+-- 2. Ajouter infos_demandees (question du gestionnaire)
+ALTER TABLE `commentaires` 
+ADD COLUMN `infos_demandees` TEXT NULL 
+AFTER `type_commentaire`;
+
+-- 3. Créer table pièces jointes pour réponses infos
+CREATE TABLE IF NOT EXISTS `pieces_jointes_infos` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `commentaire_id` int(11) NOT NULL,
+  `nom_original` varchar(255) NOT NULL,
+  `nom_stockage` varchar(255) NOT NULL,
+  `chemin_fichier` varchar(500) NOT NULL,
+  `mime` varchar(100) DEFAULT NULL,
+  `taille` int(11) DEFAULT NULL,
+  `date_ajout` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `commentaire_id` (`commentaire_id`),
+  CONSTRAINT `pieces_jointes_infos_ibfk_1` FOREIGN KEY (`commentaire_id`) REFERENCES `commentaires` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 4. Vérifier que le statut "attente_info_reclamant" existe
+INSERT IGNORE INTO `statuts` (`cle`, `libelle`) VALUES 
+('attente_info_reclamant', 'En attente d\'informations');
+
+-- 5. Index pour performances
+CREATE INDEX IF NOT EXISTS idx_commentaires_type ON commentaires(type_commentaire, date_commentaire);
+CREATE INDEX IF NOT EXISTS idx_notifications_type ON notifications(type, lu, date_creation);
+
+-- Vérification
+SELECT 'Ajouts SQL terminés avec succès !' AS statut;
