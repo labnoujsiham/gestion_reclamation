@@ -474,24 +474,7 @@ function formatDateShort($date) {
                     </p>
                 </div>
 
-                <!-- Update Status -->
-                <div class="action-section">
-                    <h3 class="action-title">mettre à jour le statut</h3>
-                    <form method="POST" class="action-form">
-                        <input type="hidden" name="action" value="update_status">
-                        <select name="statut_id" class="action-select">
-                            <?php foreach ($statuts as $statut): ?>
-                                <option 
-                                    value="<?php echo $statut['id']; ?>"
-                                    <?php echo ($reclamation['statut_cle'] === $statut['cle']) ? 'selected' : ''; ?>
-                                >
-                                    <?php echo htmlspecialchars($statut['libelle']); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                        <button type="submit" class="btn-action">changer statut</button>
-                    </form>
-                </div>
+                
 
                 <!-- Update Priority -->
                 <div class="action-section">
